@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+venv/
+.env
+
+.DS_Store
+.idea/
+.vscode/
+
+mock_emails.log
