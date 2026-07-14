@@ -1,0 +1,479 @@
+{
+	"info": {
+		"_postman_id": "c62b6677-742a-4318-80f0-8c29bde56a21",
+		"name": "ATS Backend API",
+		"description": "Postman collection for testing the FastAPI Job Application Tracking System (ATS) Backend.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register Candidate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"candidate@example.com\",\n    \"password\": \"candidatepass123\",\n    \"role\": \"candidate\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Recruiter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"recruiter@companya.com\",\n    \"password\": \"recruiterpass123\",\n    \"role\": \"recruiter\",\n    \"company_name\": \"Company A\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Candidate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access_token) {",
+									"    pm.environment.set(\"candidate_token\", jsonData.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"candidate@example.com\",\n    \"password\": \"candidatepass123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Recruiter",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access_token) {",
+									"    pm.environment.set(\"recruiter_token\", jsonData.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"recruiter@companya.com\",\n    \"password\": \"recruiterpass123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jobs",
+			"item": [
+				{
+					"name": "Create Job",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.environment.set(\"job_id\", jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{recruiter_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Senior Python Backend Engineer\",\n    \"description\": \"Responsible for building high performance web services using FastAPI and SQLAlchemy.\",\n    \"status\": \"open\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/jobs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Jobs List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{candidate_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jobs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Job by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{candidate_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jobs/{{job_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs",
+								"{{job_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Job",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{recruiter_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Principal Backend Architect\",\n    \"description\": \"Lead the design and development of modern systems.\",\n    \"status\": \"open\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/jobs/{{job_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs",
+								"{{job_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Job",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{recruiter_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jobs/{{job_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs",
+								"{{job_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Applications",
+			"item": [
+				{
+					"name": "Apply for Job",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.environment.set(\"application_id\", jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{candidate_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resume_url\": \"https://s3.amazonaws.com/cv-bucket/resume.pdf\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/jobs/{{job_id}}/applications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs",
+								"{{job_id}}",
+								"applications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Applications (Candidate)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{candidate_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/applications/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"applications",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Application Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{recruiter_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/applications/{{application_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"applications",
+								"{{application_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Job Applications (Filtered by Stage)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{recruiter_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jobs/{{job_id}}/applications?stage=Applied",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs",
+								"{{job_id}}",
+								"applications"
+							],
+							"query": [
+								{
+									"key": "stage",
+									"value": "Applied"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Application Stage",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{recruiter_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stage\": \"Screening\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/applications/{{application_id}}/stage",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"applications",
+								"{{application_id}}",
+								"stage"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}
