@@ -1,0 +1,82 @@
+
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: ats_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password_123
+      POSTGRES_DB: ats_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ats_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  queue:
+    image: redis:7-alpine
+    container_name: ats_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: ats_api
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=ats_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres_password_123
+      - QUEUE_URL=redis://queue:6379/0
+      - JWT_SECRET=super_secret_jwt_signing_key_change_me_in_production_1234567890
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+    ports:
+      - "3000:3000"
+    command: >
+      sh -c "python -m app.database.wait_for_services &&
+             alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      queue:
+        condition: service_healthy
+
+  worker:
+    build: .
+    container_name: ats_worker
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=ats_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres_password_123
+      - QUEUE_URL=redis://queue:6379/0
+      - JWT_SECRET=super_secret_jwt_signing_key_change_me_in_production_1234567890
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+    volumes:
+      - ./mock_emails.log:/app/mock_emails.log
+    command: >
+      sh -c "python -m app.database.wait_for_services &&
+             celery -A app.queue.celery_app.celery_app worker --loglevel=info"
+    depends_on:
+      db:
+        condition: service_healthy
+      queue:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
